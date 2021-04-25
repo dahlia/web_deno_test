@@ -11,7 +11,6 @@ for (const [suiteName, tests] of Object.entries(getTestSuites(true))) {
         : t.ignore
         ? test.skip
         : test;
-        console.log(register, t);
       register(t.name, t.fn);
     }
   });
