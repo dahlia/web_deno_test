@@ -1,13 +1,40 @@
 import {
   fromFileUrl,
   join,
-  resolve,
   toFileUrl,
 } from "https://deno.land/std@0.92.0/path/mod.ts";
+
+export class Timeout {
+  readonly value: number;
+  readonly unit: "ms" | "s";
+
+  constructor(value: number, unit: "ms" | "s") {
+    this.value = value;
+    this.unit = unit;
+  }
+
+  static from(string: string | undefined): Timeout | undefined {
+    if (string == null) return;
+    const m = /^(\d+)(s|ms)?$/.exec(string);
+    if (m == null) {
+      throw new Error("Invalid timeout format: " + string);
+    }
+    return new Timeout(+m[1], m[2] == "s" ? m[2] : "ms");
+  }
+
+  toString(): string {
+    return `${this.value}${this.unit == "ms" ? "" : this.unit}`;
+  }
+}
+
+export interface BundleOptions {
+  timeout?: Timeout,
+}
 
 export async function bundleTests(
   testFiles: Set<URL>,
   outDir: URL,
+  options: BundleOptions,
 ): Promise<void> {
   try {
     await Deno.lstat(outDir);
@@ -40,7 +67,10 @@ export async function bundleTests(
       `
       ${testImports}
       import { getTestSuites } from ${JSON.stringify(modUrl)};
-      export { getTestSuites };
+      const bundleOptions = {
+        timeout: ${JSON.stringify(options.timeout?.toString() ?? null)},
+      };
+      export { getTestSuites, bundleOptions };
       `,
     );
     const { files } = await Deno.emit(mainUrl, {

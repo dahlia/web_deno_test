@@ -6,14 +6,14 @@ import {
   toFileUrl,
 } from "https://deno.land/std@0.92.0/path/mod.ts";
 import { parse } from "https://deno.land/std@0.94.0/flags/mod.ts";
-import { bundleTests } from "./bundle.ts";
+import { Timeout, bundleTests } from "./bundle.ts";
 import { scanTestFiles } from "./scanner.ts";
 
 const localCall = import.meta.url.startsWith("file:");
 
 async function main(): Promise<void> {
   const opts = parse(Deno.args, {
-    string: ["o", "output-dir"],
+    string: ["o", "output-dir", "t", "timeout"],
     boolean: ["h", "help"],
     "--": true,
     unknown: (option: string) => {
@@ -30,7 +30,7 @@ async function main(): Promise<void> {
     console.info(
       "Usage: deno run --unstable",
       import.meta.url,
-      "-o|--output-dir=DIR [DIR...] [FILE...]",
+      "-o|--output-dir=DIR [-t|--timeout=MS] [DIR...] [FILE...]",
     );
     console.info(
       "It scans the current working directory (.) by default " +
@@ -43,10 +43,25 @@ async function main(): Promise<void> {
     console.error("Error: -o/--output-dir cannot be applied multiple times.");
     Deno.exit(1);
   }
+  else if (opts.t != null && opts.timeout != null) {
+    console.error("Error: -t/--timeout cannot be applied multiple times.");
+    Deno.exit(1);
+  }
 
   const outputDir: string | undefined = opts["output-dir"] ?? opts.o;
   if (outputDir == null) {
     console.error("Error: -o/--output-dir is required.");
+    Deno.exit(1);
+  }
+
+  let timeout: Timeout | undefined;
+  try {
+    timeout = Timeout.from(opts.timeout ?? opts.t);
+  } catch {
+    console.error(
+      "Error: -t/--timeout must be milliseconds (e.g.: 2000) or " +
+        "seconds (e.g.: 2s)."
+    );
     Deno.exit(1);
   }
 
@@ -99,7 +114,9 @@ async function main(): Promise<void> {
   const testFiles = await scanTestFiles(
     new Set([...paths].map((p) => toFileUrl(resolve(p)))),
   );
-  await bundleTests(testFiles, toFileUrl(resolve(outputDir)));
+  await bundleTests(testFiles, toFileUrl(resolve(outputDir)), {
+    timeout: timeout,
+  });
 }
 
 if (import.meta.main) {

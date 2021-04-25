@@ -1,6 +1,7 @@
-import { getTestSuites } from './run_tests.js';
+import { bundleOptions, getTestSuites } from './run_tests.js';
 
 mocha.setup('tdd');
+mocha.timeout(bundleOptions.timeout);
 
 for (const [suiteName, tests] of Object.entries(getTestSuites(true))) {
   suite(suiteName, function () {
