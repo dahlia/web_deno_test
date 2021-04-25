@@ -44,6 +44,12 @@ async function main(): Promise<void> {
     Deno.exit(1);
   }
 
+  const outputDir: string | undefined = opts["output-dir"] ?? opts.o;
+  if (outputDir == null) {
+    console.error("Error: -o/--output-dir is required.");
+    Deno.exit(1);
+  }
+
   const paths: Set<string> = new Set(opts["_"].map((s) => s.toString()));
   if (paths.size < 1) {
     paths.add(".");
@@ -81,7 +87,6 @@ async function main(): Promise<void> {
     }
   }
 
-  const outputDir = opts["output-dir"] ?? opts.o;
   const writePermission = await Deno.permissions.request({
     name: "write",
     path: outputDir,
