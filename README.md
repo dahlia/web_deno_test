@@ -3,7 +3,12 @@
 web_deno_test: Run your tests on Deno and web browsers at a time
 ================================================================
 
+[![GitHub Actions Status][GitHub Actions Status Badge]][GitHub Actions Status]
+
 This script enables your test suite to run on Deno and web browsers at a time.
+
+[GitHub Actions Status Badge]: https://github.com/dahlia/web_deno_test/actions/workflows/test.yaml/badge.svg
+[GitHub Actions Status]: https://github.com/dahlia/web_deno_test/actions/workflows/test.yaml
 
 
 How to write tests
