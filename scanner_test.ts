@@ -17,7 +17,7 @@ test("scanTestFiles()", async () => {
     await scanTestFiles("not-found");
     assert(
       false,
-      "Expected Deno.errors.NotFound to be thrown, but caught no error at all."
+      "Expected Deno.errors.NotFound to be thrown, but caught no error at all.",
     );
   } catch (notFound) {
     assert(
@@ -37,7 +37,7 @@ test("scanTestFiles()", async () => {
     assert(
       false,
       "Expected Deno.errors.PermissionDenied to be thrown, " +
-        "but caught no error at all."
+        "but caught no error at all.",
     );
   } catch (permissionDenied) {
     assert(
@@ -61,6 +61,7 @@ test("scanTestFiles()", async () => {
   assertEquals(
     testFiles,
     new Set<URL>([
+      toFileUrl(resolve("bundle_test.ts")),
       toFileUrl(resolve("scanner_test.ts")),
       toFileUrl(resolve("sample/sample_test.ts")),
     ]),
